@@ -200,6 +200,7 @@ namespace IwaraDownloader
                         result = new() { Code = ResultCode.OK, Msg = "ÒÑÌí¼Ó" };
                         break;
                     case RequestCode.State:
+                        Log($"Ver:{string.Join('.', quest.Ver)}");
                         result = new() { Code = ResultCode.OK, Data = DownloadQueue };
                         break;
                     default:

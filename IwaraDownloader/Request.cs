@@ -9,18 +9,18 @@ namespace Dawnlc.Module
     }
     public struct Request
     {
-        public int Ver
+        public int[] Ver
         {
             get
             {
-                return ver ?? 1;
+                return ver ?? new int[] { 0, 0, 0 };
             }
             set
             {
                 ver = value;
             }
         }
-        private int? ver;
+        private int[]? ver;
 
         public string? Token
         {

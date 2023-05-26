@@ -49,9 +49,9 @@ namespace Dawnlc.Module
             }
         }
 
-        public static void Log(string value)
+        public static void Log(string? value)
         {
-            AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [lime]I[/][/] {Markup.Escape(value)}");
+            AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [lime]I[/][/] {Markup.Escape(value ?? "null")}");
         }
         public static void Warn(string value)
         {
