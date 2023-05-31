@@ -268,10 +268,12 @@ namespace IwaraDownloader
                 {
                     Action<double> action = (e) =>
                     {
+                        task.Progress = e;
                         Log($"{task.Video.Name} {e:N2}%");
                     };
-                    task.DownloadProgressChanged += action.LimitInvocationRate(1, TimeSpan.FromSeconds(2));
+                    task.DownloadProgressChanged += action.LimitInvocationRate(1, TimeSpan.FromSeconds(1));
                     await HTTP.DownloadAsync(new(task.Video.DownloadUrl), task.Video.Path, task);
+                    task.Progress = 100;
                     task.State = DownloadTask.TaskState.Downloaded;
                     Log($"{task.Video.Name} 正在校验文件...");
                     using (FileStream file = File.OpenRead(task.Video.Path))
