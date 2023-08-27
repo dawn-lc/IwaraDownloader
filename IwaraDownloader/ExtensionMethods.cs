@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Collections;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -171,7 +170,7 @@ namespace Dawnlc.Module
             response.ContentType = "application/json";
             return new();
         }
-
+        /*
         public static ObservableCollection<T> ConvertTo<T>(this SqliteDataReader reader)
         {
             ObservableCollection<T> list = new();
@@ -205,6 +204,79 @@ namespace Dawnlc.Module
                             catch (Exception ex)
                             {
                                 Console.WriteLine($"Err: {reader[i]} {obj?.GetType()} {ex}");
+                            }
+                        }
+                        list.Add(obj);
+                    }
+                }
+            }
+            return list;
+        }
+        */
+        public static ObservableCollection<Video> ConvertToVideo(this SqliteDataReader reader)
+        {
+            ObservableCollection<Video> list = new();
+            using (reader)
+            {
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        Video obj = new();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            object item = reader[i];
+                            string name = reader.GetName(i);
+                            try
+                            {
+                                switch (name)
+                                {
+                                    case "ID":
+                                        obj.ID = Convert.ToString(item)!;
+                                        break;
+                                    case "Source":
+                                        obj.Source = Convert.ToString(item)!;
+                                        break;
+                                    case "Name":
+                                        obj.Name = Convert.ToString(item)!;
+                                        break;
+                                    case "Alias":
+                                        obj.Alias = Convert.ToString(item)!;
+                                        break;
+                                    case "Author":
+                                        obj.Author = Convert.ToString(item)!;
+                                        break;
+                                    case "Tags":
+                                        obj.Tags = (List<Video.Tag>?)Convert.ToString(item).ConvertTo(typeof(List<Video.Tag>)) ?? new List<Video.Tag>();
+                                        break;
+                                    case "Info":
+                                        obj.Author = Convert.ToString(item)!;
+                                        break;
+                                    case "UploadTime":
+                                        obj.UploadTime = (DateTime)Convert.ChangeType(item, typeof(DateTime));
+                                        break;
+                                    case "DownloadTime":
+                                        obj.DownloadTime = (DateTime)Convert.ChangeType(item, typeof(DateTime));
+                                        break;
+                                    case "Size":
+                                        obj.Size = (long)Convert.ChangeType(item, typeof(long));
+                                        break;
+                                    case "Path":
+                                        obj.Path = Convert.ToString(item)!;
+                                        break;
+                                    case "Exists":
+                                        obj.Exists = (bool)Convert.ChangeType(item, typeof(bool));
+                                        break;
+                                    case "Hash":
+                                        obj.Hash = (byte[])Convert.ChangeType(item, typeof(byte[]));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"DB {name} {item} Err: {ex}");
                             }
                         }
                         list.Add(obj);

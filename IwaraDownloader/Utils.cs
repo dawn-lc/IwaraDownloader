@@ -1,5 +1,4 @@
 ﻿using IwaraDownloader;
-using Spectre.Console;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -22,7 +21,6 @@ namespace Dawnlc.Module
             public static readonly HttpHeaders Headers = new HttpClient().DefaultRequestHeaders;
             public static Config MainConfig { get; set; } = DeserializeJSONFile<Config>(System.IO.Path.Combine(Path, "config.json"));
         }
-
         public static JsonSerializerOptions JsonOptions { get; set; } = new()
         {
             WriteIndented = true,
@@ -51,23 +49,39 @@ namespace Dawnlc.Module
 
         public static void Log(string? value)
         {
-            AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [lime]I[/][/] {Markup.Escape(value ?? "null")}");
+            Console.WriteLine($"[{DateTime.Now}] I {value}");
+            //AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [lime]I[/][/] {Markup.Escape(value ?? "null")}");
         }
         public static void Warn(string value)
         {
-            AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [orangered1]W[/][/] {Markup.Escape(value)}");
+            Console.WriteLine($"[{DateTime.Now}] W {value}");
+            //AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [orangered1]W[/][/] {Markup.Escape(value)}");
         }
         public static void Error(string value)
         {
-            AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [red]E[/][/] {Markup.Escape(value)}");
+            Console.WriteLine($"[{DateTime.Now}] E {value}");
+            //AnsiConsole.MarkupLine($"[bold][[{DateTime.Now}]] [red]E[/][/] {Markup.Escape(value)}");
         }
 
-        
+
+        public static bool IsValidPath(string path)
+        {
+            try
+            {
+                return !(string.IsNullOrEmpty(path) || !Path.IsPathRooted(path) || !Directory.Exists(Path.GetPathRoot(path)) || path.IndexOfAny(Path.GetInvalidPathChars()) >= 0);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static async Task<T> DeserializeJSONFileAsync<T>(string path) where T : new()
         {
             T? data;
             return File.Exists(path) ? (data = JsonSerializer.Deserialize<T>(await File.ReadAllTextAsync(path), JsonOptions)) != null ? data : new T() : new T();
         }
+
         public static T DeserializeJSONFile<T>(string path) where T : new()
         {
             T? data;

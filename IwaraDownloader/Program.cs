@@ -1,6 +1,5 @@
 using Dawnlc.Module;
 using Microsoft.AspNetCore.StaticFiles;
-using Spectre.Console;
 using System.Collections.Concurrent;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
@@ -15,7 +14,7 @@ namespace IwaraDownloader
         private static ConcurrentDictionary<string, DownloadTask> DownloadQueue = new();
         public static WebApplicationBuilder Initialize()
         {
-            AnsiConsole.Write(Figgle.FiggleFonts.Standard.Render(Env.Name));
+            Console.WriteLine(Figgle.FiggleFonts.Standard.Render(Env.Name));
             DirectoryInfo WebRootPath = new(Env.MainConfig.WebRootPath);
             if (!WebRootPath.Exists)
             {
@@ -130,6 +129,7 @@ namespace IwaraDownloader
             catch (Exception e)
             {
                 Error($"{e.Message}");
+                Error($"{e}");
                 Console.WriteLine("任意键退出...");
                 Console.ReadKey();
             }
@@ -167,7 +167,7 @@ namespace IwaraDownloader
             {
                 "name" => DB.Videos.Where(i => !i.Exists || !Request.Query.ContainsKey("key") || i.Name.Contains(Request.Query["key"]!, StringComparison.CurrentCultureIgnoreCase)).OrderByDescending(p => p.Name),
                 "author" => DB.Videos.Where(i => !i.Exists || !Request.Query.ContainsKey("key") || (i.Author.Contains(Request.Query["key"]!, StringComparison.CurrentCultureIgnoreCase) || i.Alias.Contains(Request.Query["key"]!, StringComparison.CurrentCultureIgnoreCase))).OrderByDescending(p => p.Author),
-                "tag" => DB.Videos.Where(i => !i.Exists || !Request.Query.ContainsKey("key") || i.Tag.Any(t=>t.Contains(Request.Query["key"]!, StringComparison.CurrentCultureIgnoreCase))),
+                "tag" => DB.Videos.Where(i => !i.Exists || !Request.Query.ContainsKey("key") || i.Tags.Any(t => t.ID.Contains(Request.Query["key"]!, StringComparison.CurrentCultureIgnoreCase))),
                 "size" => DB.Videos.Where(i => i.Exists).OrderByDescending(p => p.Size),
                 _ => DB.Videos.Where(i => i.Exists).OrderByDescending(p => p.UploadTime),
             };
@@ -198,6 +198,13 @@ namespace IwaraDownloader
                         }
                         PustDownloadTask(Task);
                         result = new() { Code = ResultCode.OK, Msg = "已添加" };
+                        break;
+                    case RequestCode.Check:
+                        VideoTask TestTask = JsonSerializer.Deserialize<VideoTask>(quest.Data, JsonOptions) ?? throw new ArgumentNullException(nameof(VideoTask), "Deserialization failed");
+                        if (Directory.Exists(Path.GetDirectoryName(TestTask.Path)))
+                        {
+                            result = new() { Code = ResultCode.OK, Msg = "已添加" };
+                        }
                         break;
                     case RequestCode.State:
                         Log($"Ver:{string.Join('.', quest.Ver)}");
@@ -294,6 +301,7 @@ namespace IwaraDownloader
                 }
                 finally
                 {
+                    GC.Collect();
                     DownloadFile();
                 }
             }
