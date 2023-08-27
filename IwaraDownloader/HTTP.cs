@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Spectre.Console;
 using static Dawnlc.Module.Utils;
 
 namespace Dawnlc.Module
@@ -232,27 +231,46 @@ namespace Dawnlc.Module
                     long chunkSize = fileLength / Env.MainConfig.ParallelCount;
                     if (fileLength > 0)
                     {
-                        var Paralleltasks = Enumerable.Range(0, Env.MainConfig.ParallelCount).Select(async p => {
+                        async Task chunk(int p, int tryCount)
+                        {
+                            Log($"Task: {task.Video.Name} chunk: {p} try: {tryCount} ");
                             long rangeStart = p * chunkSize;
                             long rangeEnd = ((p + 1) != Env.MainConfig.ParallelCount) ? (rangeStart + chunkSize) : fileLength;
-                            byte[] buffer = new byte[Env.MainConfig.BufferBlockSize];
-                            List<KeyValuePair<string, IEnumerable<string>>>? Range = new() { new("Range", new List<string>() { $"bytes={rangeStart}-{rangeEnd}" }) };
-                            Stream ResponseStream = await (await GetStreamAsync(url, Range.Concat(head.Where(i => i.Key.ToLower() != "range")))).Content.ReadAsStreamAsync();
-                            int bytesRead;
-                            long chunkSeek = rangeStart;
-                            using (FileStream destination = new(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
+                            try
                             {
-                                while ((bytesRead = await ResponseStream.ReadAsync(buffer)) != 0)
+                                byte[] buffer = new byte[Env.MainConfig.BufferBlockSize];
+                                List<KeyValuePair<string, IEnumerable<string>>>? Range = new() { new("Range", new List<string>() { $"bytes={rangeStart}-{rangeEnd}" }) };
+                                Stream ResponseStream = await (await GetStreamAsync(url, Range.Concat(head.Where(i => i.Key.ToLower() != "range")))).Content.ReadAsStreamAsync();
+                                int bytesRead;
+                                long chunkSeek = rangeStart;
+                                using (FileStream destination = new(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
                                 {
-                                    destination.Seek(chunkSeek, SeekOrigin.Begin);
-                                    await destination.WriteAsync(buffer.AsMemory(0, bytesRead));
-                                    ReceivedBytes += bytesRead;
-                                    chunkSeek = destination.Position;
-                                    task.OnDownloadProgressChanged((double)ReceivedBytes / fileLength * 100);
+                                    while ((bytesRead = await ResponseStream.ReadAsync(buffer)) != 0)
+                                    {
+                                        destination.Seek(chunkSeek, SeekOrigin.Begin);
+                                        await destination.WriteAsync(buffer.AsMemory(0, bytesRead));
+                                        ReceivedBytes += bytesRead;
+                                        chunkSeek = destination.Position;
+                                        task.OnDownloadProgressChanged((double)ReceivedBytes / fileLength * 100);
+                                    }
+                                };
+                            }
+                            catch (HttpRequestException ex)
+                            {
+                                if (tryCount < 5)
+                                {
+                                    Log($"Task: {task.Video.Name} HttpRequestException try:{tryCount} Delay10s");
+                                    await Task.Delay(1000 * 10);
+                                    await chunk(p, tryCount++);
                                 }
-                            };
-                        });
-                        await Task.WhenAll(Paralleltasks);
+                                else
+                                {
+                                    Log($"Task: {task.Video.Name} tryCount Max throw");
+                                    throw ex;
+                                }
+                            }
+                        }
+                        Task.WaitAll(Enumerable.Range(0, Env.MainConfig.ParallelCount).Select(p => chunk(p, 0)).ToArray());
                         return;
                     }
                 }
@@ -271,7 +289,8 @@ namespace Dawnlc.Module
             }
             catch (Exception ex)
             {
-                throw new($"Downloading {url.ToString() ?? path} \r\n {ex}");
+                Log($"DownloadException {url.ToString() ?? path}");
+                Warn($"----------- Errer info -----------{Environment.NewLine}{ex}");
             }
         }
     }

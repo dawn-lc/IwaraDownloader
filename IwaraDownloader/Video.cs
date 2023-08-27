@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Net;
 using static Dawnlc.Module.Utils;
+using static Dawnlc.Module.Video;
 
 namespace Dawnlc.Module
 {
@@ -109,7 +110,7 @@ namespace Dawnlc.Module
             }
         }
         private string? alias;
-        
+
         /// <summary>
         /// 作者
         /// </summary>
@@ -130,25 +131,31 @@ namespace Dawnlc.Module
         }
         private string? author;
 
+
+        public struct Tag
+        {
+            public string ID { get; set; }
+            public string Type { get; set; }
+        }
         /// <summary>
         /// 标签
         /// </summary>
-        public List<string> Tag
+        public List<Tag> Tags
         {
             get
             {
-                return tag ?? new List<string>() { "Uncategorized" };
+                return tags ?? new List<Tag>() { new Tag() { ID = "Uncategorized" , Type = "Uncategorized" } };
             }
             set
             {
-                if (tag != value)
+                if (tags != value)
                 {
-                    tag = value;
+                    tags = value;
                     OnPropertyChanged(nameof(Tag));
                 }
             }
         }
-        private List<string>? tag;
+        private List<Tag>? tags;
 
         /// <summary>
         /// 附加信息
@@ -245,7 +252,7 @@ namespace Dawnlc.Module
                 }
                 else
                 {
-                    System.IO.Directory.CreateDirectory(directoryPath);
+                    Directory.CreateDirectory(directoryPath);
                     return path;
                 }
             }
@@ -253,8 +260,15 @@ namespace Dawnlc.Module
             {
                 if (value != path)
                 {
-                    path = value;
-                    OnPropertyChanged(nameof(Path));
+                    if (IsValidPath(value))
+                    {
+                        path = value;
+                        OnPropertyChanged(nameof(Path));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(value);
+                    }
                 }
             }
         }

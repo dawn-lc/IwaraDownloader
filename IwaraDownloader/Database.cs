@@ -46,7 +46,7 @@ namespace Dawnlc.Module
             ");
             using (var reader = ExecuteReaderCommand(@"SELECT * FROM 'Videos'"))
             {
-                Videos = reader.ConvertTo<Video>();
+                Videos = reader.ConvertToVideo();
             }
             SqliteCommand INSERT_Videos = new($"INSERT INTO 'Videos' (ID,Source,Name,Alias,Author,Tag,Info,UploadTime,DownloadTime,Size,Path,[Exists],Hash) VALUES (@ID,@Source,@Name,@Alias,@Author,@Tag,@Info,@UploadTime,@DownloadTime,@Size,@Path,@Exists,@Hash)", DBConnect);
             SqliteCommand DELETE_Videos = new($"DELETE FROM 'Videos' WHERE ID=@ID", DBConnect);
@@ -67,7 +67,7 @@ namespace Dawnlc.Module
                                     new("@Name",item.Name),
                                     new("@Alias",item.Alias),
                                     new("@Author",item.Author),
-                                    new("@Tag",JsonSerializer.Serialize(item.Tag)),
+                                    new("@Tag",JsonSerializer.Serialize(item.Tags)),
                                     new("@Info",item.Info),
                                     new("@UploadTime",item.UploadTime),
                                     new("@DownloadTime",item.DownloadTime),
@@ -105,7 +105,7 @@ namespace Dawnlc.Module
                                     new("@Name",item.Name),
                                     new("@Alias",item.Alias),
                                     new("@Author",item.Author),
-                                    new("@Tag",JsonSerializer.Serialize(item.Tag)),
+                                    new("@Tag",JsonSerializer.Serialize(item.Tags)),
                                     new("@Info",item.Info),
                                     new("@UploadTime",item.UploadTime),
                                     new("@DownloadTime",item.DownloadTime),

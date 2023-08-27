@@ -3,12 +3,31 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <!--PublishAot>true</PublishAot-->
     <ImplicitUsings>enable</ImplicitUsings>
     <StartupObject>IwaraDownloader.Program</StartupObject>
     <BaseOutputPath>bin\</BaseOutputPath>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <SignAssembly>False</SignAssembly>
+
+    <!--
+
+    <PublishAot>true</PublishAot>
+    <StripSymbols>true</StripSymbols>
+		<IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+		<IlcTrimMetadata>true</IlcTrimMetadata>
+		<IlcDisableReflection>true</IlcDisableReflection>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<IlcOptimizationPreference>Size</IlcOptimizationPreference>
+		<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+		<TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+		<EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+		<EventSourceSupport>false</EventSourceSupport>
+		<MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+		<UseSystemResourceKeys>true</UseSystemResourceKeys>
+    
+    -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,7 +42,6 @@
     <PackageReference Include="Figgle" Version="0.5.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.3" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.3" />
-    <PackageReference Include="Spectre.Console" Version="0.46.0" />
   </ItemGroup>
 
 </Project>

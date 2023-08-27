@@ -35,7 +35,11 @@ namespace Dawnlc.Module
         /// <summary>
         /// 不存在
         /// </summary>
-        NotFound
+        NotFound,
+        /// <summary>
+        /// 路径不存在
+        /// </summary>
+        PathNotFound
 
     }
     public class Result

@@ -5,6 +5,7 @@ namespace Dawnlc.Module
     public enum RequestCode
     {
         Add,
+        Check,
         State
     }
     public struct Request
